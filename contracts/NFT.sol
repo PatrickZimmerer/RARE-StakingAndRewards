@@ -4,8 +4,8 @@ pragma solidity 0.8.7;
 import "../node_modules/@openzeppelin/contracts/token/ERC721/ERC721.sol";
 
 contract NFT is ERC721 {
-    uint256 public tokenSupply = 0;
-    uint256 public constant MAX_SUPPLY = 5;
+    uint256 public tokenSupply = 1;
+    uint256 public constant MAX_SUPPLY = 6;
     uint256 public constant PRICE = 0.001 ether;
 
     address immutable deployer;
@@ -15,10 +15,14 @@ contract NFT is ERC721 {
     }
 
     function mint() external payable {
-        require(tokenSupply < MAX_SUPPLY, "Max supply reached");
+        uint256 _tokenSupply = tokenSupply; // added local variable to reduce gas cost
+        require(_tokenSupply < MAX_SUPPLY, "Max supply reached");
         require(msg.value == PRICE, "Not enough ETH sent");
-        _mint(msg.sender, tokenSupply);
-        tokenSupply++;
+        _mint(msg.sender, _tokenSupply);
+        unchecked {
+            _tokenSupply++; // added unchecked block since overflow check gets handled by require MAX_SUPPLY
+        }
+        tokenSupply = _tokenSupply;
     }
 
     function _baseURI() internal pure override returns (string memory) {
@@ -31,5 +35,9 @@ contract NFT is ERC721 {
 
     function withdraw() external {
         payable(deployer).transfer(address(this).balance);
+    }
+
+    function totalSupply() external pure returns (uint256) {
+        return MAX_SUPPLY - 1; // token supply starts at 1
     }
 }
