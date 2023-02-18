@@ -5,7 +5,7 @@ pragma solidity 0.8.7;
 import {ERC20Capped, ERC20} from "../node_modules/@openzeppelin/contracts/token/ERC20/extensions/ERC20Capped.sol";
 import {Ownable} from "../node_modules/@openzeppelin/contracts/access/Ownable.sol";
 
-contract BasicERC20 is ERC20Capped, Ownable {
+contract Token is ERC20Capped, Ownable {
     uint256 public constant MAX_SUPPLY = 10_000_000 * 10 ** 18;
 
     constructor(

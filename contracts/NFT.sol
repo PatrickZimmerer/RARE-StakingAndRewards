@@ -3,7 +3,7 @@ pragma solidity 0.8.7;
 
 import "../node_modules/@openzeppelin/contracts/token/ERC721/ERC721.sol";
 
-contract MyToken is ERC721 {
+contract NFT is ERC721 {
     uint256 public tokenSupply = 0;
     uint256 public constant MAX_SUPPLY = 5;
     uint256 public constant PRICE = 0.001 ether;
