@@ -5,10 +5,6 @@ pragma solidity 0.8.7;
 import {ERC20Capped, ERC20} from "../node_modules/@openzeppelin/contracts/token/ERC20/extensions/ERC20Capped.sol";
 import {Ownable} from "../node_modules/@openzeppelin/contracts/access/Ownable.sol";
 
-// QUESTION: Jeffrey said he's not a big fan of Ownable from Openzeppelin because you can fuck up things
-//           should we rather use i_deployer = msg.sender in constructor and then just put the require(i_deployer)
-//           in a new modifier, what's best practice?
-
 /*
  * @title Basic ERC20 contract where the controller contract can mint
  * @author Patrick Zimmerer
