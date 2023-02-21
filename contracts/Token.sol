@@ -1,5 +1,4 @@
 // SPDX-License-Identifier: MIT
-// QUESTION: I always see people using Solidity 0.8.7 so what is the recommended version to use when creating a new contract?
 pragma solidity 0.8.7;
 
 import {ERC20Capped, ERC20} from "../node_modules/@openzeppelin/contracts/token/ERC20/extensions/ERC20Capped.sol";

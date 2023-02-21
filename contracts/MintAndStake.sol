@@ -6,7 +6,7 @@ import "../contracts/Token.sol";
 
 import "../node_modules/@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
 
-contract MintAndReceive is IERC721Receiver {
+contract MintAndStake is IERC721Receiver {
     Token public tokenContract;
     NFT public NFTContract;
     IERC721 public itemNFT;
