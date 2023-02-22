@@ -4,7 +4,7 @@ pragma solidity 0.8.7;
 import "../contracts/NFT.sol";
 import "../contracts/Token.sol";
 
-import "../node_modules/@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
+import "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
 
 contract MintAndStake is IERC721Receiver {
     Token public tokenContract;
@@ -22,7 +22,7 @@ contract MintAndStake is IERC721Receiver {
         address from,
         uint256 tokenId,
         bytes calldata data
-    ) external pure override returns (bytes4) {
+    ) external override returns (bytes4) {
         originalOwner[tokenId] = from;
         return IERC721Receiver.onERC721Received.selector;
     }

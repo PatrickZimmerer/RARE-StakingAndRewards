@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.7;
 
-import "../node_modules/@openzeppelin/contracts/token/ERC721/ERC721.sol";
+import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 
 contract NFT is ERC721 {
     uint256 public tokenSupply = 1;
     uint256 public constant MAX_SUPPLY = 6;
-    uint256 public constant PRICE = 0.001 ether;
+    uint256 public constant PRICE = 0.0001 ether;
 
     address immutable deployer;
 
