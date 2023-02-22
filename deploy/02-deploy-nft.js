@@ -5,7 +5,6 @@ const { verify } = require("../utils/verify");
 module.exports = async function ({ getNamedAccounts, deployments }) {
     const { deploy, log } = deployments;
     const { deployer } = await getNamedAccounts();
-    Code / StakingAndRewards / hardhat.config.js;
     const arguments = [];
 
     const nft = await deploy("NFT", {

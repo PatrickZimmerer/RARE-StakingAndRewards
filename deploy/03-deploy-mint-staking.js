@@ -6,9 +6,9 @@ module.exports = async function ({ getNamedAccounts, deployments }) {
     const { deploy, log } = deployments;
     const { deployer } = await getNamedAccounts();
 
-    const arguments = [];
+    const arguments = ["0xe4064d8E292DCD971514972415664765e51B5364"];
 
-    const erc721Merkle = await deploy("ERC721Merkle", {
+    const mintAndStake = await deploy("MintAndStake", {
         from: deployer,
         args: arguments,
         logs: true,
@@ -21,10 +21,10 @@ module.exports = async function ({ getNamedAccounts, deployments }) {
         process.env.ETHERSCAN_API_KEY
     ) {
         log("Verifying...");
-        await verify(erc721Merkle.address, arguments);
+        await verify(mintAndStake.address, arguments);
     }
-    log("deployed successfully at:", erc721Merkle.address);
+    log("mintAndStakedeployed successfully at:", mintAndStake.address);
     log("-----------------------------------------");
 };
 
-module.exports.tags = ["all", "erc721Merkle"];
+module.exports.tags = ["all", "mintAndStake"];
