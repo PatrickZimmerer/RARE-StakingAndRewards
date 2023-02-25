@@ -6,7 +6,14 @@ module.exports = async function ({ getNamedAccounts, deployments }) {
     const { deploy, log } = deployments;
     const { deployer } = await getNamedAccounts();
 
-    const arguments = [];
+    const name = "ERC777BondingCoin";
+    const symbol = "ECC";
+
+    let obj = require("../shared-data.js");
+    const stakingContractAddress = obj.stakingContractAddress;
+    console.log("stakingContract address is", stakingContractAddress);
+
+    const arguments = [name, symbol, stakingContractAddress];
 
     const token = await deploy("Token", {
         from: deployer,

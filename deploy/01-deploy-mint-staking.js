@@ -25,6 +25,8 @@ module.exports = async function ({ getNamedAccounts, deployments }) {
     }
     log("mintAndStakedeployed successfully at:", mintAndStake.address);
     log("-----------------------------------------");
+    let obj = require("../shared-data.js");
+    obj.stakingContractAddress = mintAndStake.address;
 };
 
 module.exports.tags = ["all", "mintAndStake"];
