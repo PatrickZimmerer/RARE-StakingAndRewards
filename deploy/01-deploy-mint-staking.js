@@ -25,6 +25,7 @@ module.exports = async function ({ getNamedAccounts, deployments }) {
     }
     log("mintAndStakedeployed successfully at:", mintAndStake.address);
     log("-----------------------------------------");
+    // updates stakingContractAddress so the ERC20 Token can add the address to the constructor when deploying the erc-20
     let obj = require("../shared-data.js");
     obj.stakingContractAddress = mintAndStake.address;
 };

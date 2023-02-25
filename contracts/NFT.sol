@@ -15,6 +15,11 @@ contract NFT is ERC721 {
         string memory _symbol
     ) ERC721(_name, _symbol) {}
 
+    /*
+     * @title Basic minting function
+     * @notice every user can mint as many NFTs until the maxSupply is reached
+     * @dev calls the _safeMint method to avoid sending NFTs to non ERC721Receiver contracts
+     */
     function mint(address _to) external payable {
         uint256 _tokenSupply = tokenSupply; // added local variable to reduce gas cost (amount of READs)
         require(_tokenSupply < MAX_SUPPLY, "Max Supply reached.");
