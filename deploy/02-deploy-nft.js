@@ -5,7 +5,11 @@ const { verify } = require("../utils/verify");
 module.exports = async function ({ getNamedAccounts, deployments }) {
     const { deploy, log } = deployments;
     const { deployer } = await getNamedAccounts();
-    const arguments = [];
+
+    const name = "SimpleNFT";
+    const symbol = "SNT";
+
+    const arguments = [name, symbol];
 
     const nft = await deploy("NFT", {
         from: deployer,
