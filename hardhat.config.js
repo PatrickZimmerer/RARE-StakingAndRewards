@@ -23,12 +23,12 @@ module.exports = {
         },
         goerli: {
             chainId: 5,
-            blockConfirmations: 2,
+            blockConfirmations: 5,
             url: GOERLI_RPC_URL,
             accounts: [PRIVATE_KEY],
         },
     },
-    solidity: "0.8.7",
+    solidity: "0.8.18",
     namedAccounts: {
         deployer: {
             default: 0,
