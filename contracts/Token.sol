@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.7;
+pragma solidity 0.8.18;
 
 import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Capped.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
@@ -14,38 +14,30 @@ contract Token is ERC20Capped, Ownable {
     uint256 public constant MAX_SUPPLY = 100_000_000 * 10 ** 18;
     uint256 public constant STAKING_AMOUNT = 10 ether; // 10 tokens
 
-    mapping(address => uint256) stakingWallet;
+    address internal immutable stakingContract;
 
-    constructor() ERC20("JustAToken", "JAT") ERC20Capped(MAX_SUPPLY) {
-        ERC20._mint(msg.sender, 10_000 * 1 ether);
+    constructor(
+        string memory _name,
+        string memory _symbol,
+        address _stakingContract
+    ) ERC20(_name, _symbol) ERC20Capped(MAX_SUPPLY) {
+        stakingContract = _stakingContract;
     }
 
-    //TODO: Add function that checks if the smart contract thats calling a specific method is the
-    //TODO: controller contract
-    modifier onlyControllerContract() {
-        require(true, "false");
+    modifier onlyStakingContract() {
+        require(
+            msg.sender == stakingContract,
+            "Only the staking contract can do this."
+        );
         _;
     }
 
     /*
-     * @title Staking wallet of the user who is staking Nfts gets increased by STAKING_AMOUNT tokens * the amount of nfts which are getting staked
-     * @notice this can only be called by the controllerContract
-     * @dev _nftsInStaking gets passed in by controller contract
+     * @title Staking contract can call this function when someone want's to withdraw his staking funds
+     * @notice this can only be called by the staking contract
      */
-    function addStakingAmount(
-        uint256 _nftsInStaking
-    ) external onlyControllerContract {
-        stakingWallet[msg.sender] += STAKING_AMOUNT * _nftsInStaking;
-    }
-
-    /*
-     * @title Withdraws the amount of staked tokens a user has in his stakingWallet
-     * @notice the controller contract can withdraw the staking rewards
-     * @dev could be changed to only transfer a specific amount of the tokens but needs a require then
-     */
-    //TODO: currently sending it to the MintAndStake contract => tokens need to go to the staking user
-    function stakingWithdraw() external onlyControllerContract {
-        _mint(msg.sender, stakingWallet[msg.sender]);
+    function mint(address _to, uint256 _amount) external onlyStakingContract {
+        _mint(_to, _amount);
     }
 
     /*
