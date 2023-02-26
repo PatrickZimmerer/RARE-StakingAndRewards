@@ -42,6 +42,7 @@ contract StakingContract is IERC721Receiver, Ownable {
         uint256 tokenId,
         bytes calldata
     ) external override returns (bytes4) {
+        require(msg.sender == address(itemNFT), "Not our NFT contract");
         nftsStaked[tokenId] = StakedNftStruct(from, block.timestamp);
         // if this returns something that makes _safeTransfers require revert,
         // does the mapping entry still persist or does that get reverted too?
