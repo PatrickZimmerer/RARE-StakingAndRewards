@@ -6,12 +6,12 @@ module.exports = async function ({ getNamedAccounts, deployments }) {
     const { deploy, log } = deployments;
     const { deployer } = await getNamedAccounts();
 
-    const name = "SimpleNFT";
-    const symbol = "SNT";
+    let addressMap = require("../shared-data.js");
+    const nftContractAddress = addressMap.nftContractAddress;
 
-    const arguments = [name, symbol];
+    const arguments = ["0xe4064d8E292DCD971514972415664765e51B5364"];
 
-    const nft = await deploy("NFT", {
+    const stakingContract = await deploy("StakingContract", {
         from: deployer,
         args: arguments,
         logs: true,
@@ -24,10 +24,12 @@ module.exports = async function ({ getNamedAccounts, deployments }) {
         process.env.ETHERSCAN_API_KEY
     ) {
         log("Verifying...");
-        await verify(nft.address, arguments);
+        await verify(stakingContract.address, arguments);
     }
-    log("nft deployed successfully at:", nft.address);
+    log("StakingContract deployed successfully at:", stakingContract.address);
     log("-----------------------------------------");
+
+    addressMap.stakingContractAddress = stakingContract.address;
 };
 
-module.exports.tags = ["all", "nft"];
+module.exports.tags = ["all", "StakingContract"];

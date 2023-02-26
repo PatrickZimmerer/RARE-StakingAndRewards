@@ -1,2 +1,5 @@
-module.exports = { a: 10 };
-module.exports = { stakingContractAddress: null };
+module.exports = {
+    stakingContractAddress: null,
+    nftContractAddress: null,
+    tokenContractAddress: null,
+};

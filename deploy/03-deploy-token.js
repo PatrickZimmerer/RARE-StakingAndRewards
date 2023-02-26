@@ -9,9 +9,8 @@ module.exports = async function ({ getNamedAccounts, deployments }) {
     const name = "SimpleToken";
     const symbol = "STK";
 
-    let obj = require("../shared-data.js");
-    const stakingContractAddress = obj.stakingContractAddress;
-    console.log("stakingContract address is", stakingContractAddress);
+    let addressMap = require("../shared-data.js");
+    const stakingContractAddress = addressMap.stakingContractAddress;
 
     const arguments = [name, symbol, stakingContractAddress];
 
@@ -32,6 +31,12 @@ module.exports = async function ({ getNamedAccounts, deployments }) {
     }
     log("Token deployed successfully at:", token.address);
     log("-----------------------------------------");
+
+    addressMap.tokenContractAddress = token.address;
+
+    log("All contracts deployed successfully ");
+    log("-----------------------------------------");
+    console.log("contract addresses are", addressMap);
 };
 
 module.exports.tags = ["all", "token"];
