@@ -4,6 +4,12 @@ pragma solidity 0.8.18;
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
 
+/*
+ * @title A Basic NFT contract
+ * @author Patrick Zimmerer
+ * @notice This contract can mint NFTs
+ * @dev and all of the basic ERC721 features
+ */
 contract NFT is ERC721 {
     using Strings for uint256;
     uint256 public tokenSupply = 1;

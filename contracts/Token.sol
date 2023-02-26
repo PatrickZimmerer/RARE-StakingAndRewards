@@ -7,7 +7,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 /*
  * @title Basic ERC20 contract where the controller contract can mint
  * @author Patrick Zimmerer
- * @notice admin and controller contract can mint new tokens
+ * @notice Staking contract can mint new tokens
  * @dev the owner can withdraw the balance of the contract
  */
 contract Token is ERC20Capped, Ownable {
