@@ -15,8 +15,7 @@ import "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
  */
 contract StakingContract is IERC721Receiver, Ownable {
     Token public tokenContract;
-    NFT public NFTContract;
-    IERC721 public immutable itemNFT;
+    IERC721 public immutable nftContract;
     uint256 public STAKING_REWARD_PER_DAY = 10 ether;
 
     struct StakedNftStruct {
@@ -28,7 +27,7 @@ contract StakingContract is IERC721Receiver, Ownable {
     mapping(uint256 => StakedNftStruct) public nftsStaked;
 
     constructor(IERC721 _address) {
-        itemNFT = _address;
+        nftContract = _address;
     }
 
     /*
@@ -42,7 +41,7 @@ contract StakingContract is IERC721Receiver, Ownable {
         uint256 tokenId,
         bytes calldata
     ) external override returns (bytes4) {
-        require(msg.sender == address(itemNFT), "Not our NFT contract");
+        require(msg.sender == address(nftContract), "Not our NFT contract");
         nftsStaked[tokenId] = StakedNftStruct(from, block.timestamp);
         // if this returns something that makes _safeTransfers require revert,
         // does the mapping entry still persist or does that get reverted too?
@@ -53,6 +52,7 @@ contract StakingContract is IERC721Receiver, Ownable {
      * @title Basic withdraw function from staking contract
      * @notice can only be withdrawn by the original owner of the nft
      * @notice just withdraws the NFT
+     * @notice USERS BE CAREFULL REWARDS WILL BE LOST IF NOT WITHDRAWN BEFORE
      */
     function withdrawNFT(uint256 _tokenId) external {
         require(
@@ -61,7 +61,7 @@ contract StakingContract is IERC721Receiver, Ownable {
         );
         StakedNftStruct memory nullStruct;
         nftsStaked[_tokenId] = nullStruct; // remove NFT from mapping
-        itemNFT.safeTransferFrom(address(this), _msgSender(), _tokenId);
+        nftContract.safeTransferFrom(address(this), _msgSender(), _tokenId);
     }
 
     /*
@@ -91,7 +91,7 @@ contract StakingContract is IERC721Receiver, Ownable {
         StakedNftStruct memory nullStruct;
         nftsStaked[_tokenId] = nullStruct; // remove NFT from mapping
         tokenContract.mint(_msgSender(), stakingReward);
-        itemNFT.safeTransferFrom(address(this), _msgSender(), _tokenId);
+        nftContract.safeTransferFrom(address(this), _msgSender(), _tokenId);
     }
 
     /*
