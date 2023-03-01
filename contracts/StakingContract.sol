@@ -20,7 +20,7 @@ contract StakingContract is IERC721Receiver, Ownable {
 
     struct StakedNftStruct {
         address originalOwner;
-        uint256 timestampOfDeposit;
+        uint96 timestampOfDeposit;
     }
 
     // keeps track of which nft is staked by a) who & b) when was it deposited
@@ -42,7 +42,7 @@ contract StakingContract is IERC721Receiver, Ownable {
         bytes calldata
     ) external override returns (bytes4) {
         require(msg.sender == address(nftContract), "Not our NFT contract");
-        nftsStaked[tokenId] = StakedNftStruct(from, block.timestamp);
+        nftsStaked[tokenId] = StakedNftStruct(from, uint96(block.timestamp));
         // if this returns something that makes _safeTransfers require revert,
         // does the mapping entry still persist or does that get reverted too?
         return IERC721Receiver.onERC721Received.selector;
