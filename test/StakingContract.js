@@ -40,12 +40,10 @@ describe("StakingContract", () => {
             TOKEN_SYMBOL,
             stakingContract.address
         );
-        console.log("before tx");
+
         const tx = await stakingContract.setTokenContract(
             tokenContract.address
         );
-        console.log("tx", tx);
-
         await tx.wait();
     });
     describe("constructor", () => {
