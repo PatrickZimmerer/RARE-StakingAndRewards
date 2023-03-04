@@ -14,19 +14,19 @@ contract Token is ERC20Capped, Ownable {
     uint256 public constant MAX_SUPPLY = 100_000_000 * 10 ** 18;
     uint256 public constant STAKING_AMOUNT = 10 ether; // 10 tokens
 
-    address internal immutable stakingContract;
+    address internal immutable STAKING_CONTRACT;
 
     constructor(
         string memory _name,
         string memory _symbol,
         address _stakingContract
     ) ERC20(_name, _symbol) ERC20Capped(MAX_SUPPLY) {
-        stakingContract = _stakingContract;
+        STAKING_CONTRACT = _stakingContract;
     }
 
     modifier onlyStakingContract() {
         require(
-            msg.sender == stakingContract,
+            msg.sender == STAKING_CONTRACT,
             "Only the staking contract can do this."
         );
         _;
