@@ -9,7 +9,7 @@ module.exports = async function ({ getNamedAccounts, deployments }) {
     let addressMap = require("../shared-data.js");
     const nftContractAddress = addressMap.nftContractAddress;
 
-    const arguments = ["0xe4064d8E292DCD971514972415664765e51B5364"];
+    const arguments = [nftContractAddress];
 
     const stakingContract = await deploy("StakingContract", {
         from: deployer,
