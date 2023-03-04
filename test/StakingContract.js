@@ -55,8 +55,27 @@ describe("StakingContract", () => {
             expect(await nftContract.address).to.not.be.null;
             expect(await nftContract.address).to.be.ok;
         });
-        it("should set the nftContract on deployment", async () => {
-            //TODO add nft contract address
+        it("should revert deployment since nftContract is not ERC721", async () => {
+            const StakingContractFactory = await ethers.getContractFactory(
+                "StakingContract"
+            );
+            await expect(
+                StakingContractFactory.deploy(tokenContract.address)
+            ).to.be.revertedWith("Contract is not ERC721");
+        });
+    });
+    describe("setTokenContract", () => {
+        it("should revert since the caller is not the owner", async () => {
+            await expect(
+                stakingContract
+                    .connect(account1)
+                    .setTokenContract(tokenContract.address)
+            ).to.be.revertedWith("Ownable: caller is not the owner");
+        });
+        it("should revert since the contract is not IToken", async () => {
+            await expect(
+                stakingContract.setTokenContract(nftContract.address)
+            ).to.be.revertedWith("Ownable: caller is not the owner");
         });
     });
 });
