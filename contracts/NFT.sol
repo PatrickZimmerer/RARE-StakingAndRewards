@@ -3,6 +3,7 @@ pragma solidity 0.8.18;
 
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
 
 /*
  * @title A Basic NFT contract
@@ -10,7 +11,7 @@ import "@openzeppelin/contracts/utils/Strings.sol";
  * @notice This contract can mint NFTs
  * @dev and all of the basic ERC721 features
  */
-contract NFT is ERC721 {
+contract NFT is ERC721, Ownable {
     using Strings for uint256;
     uint256 public tokenSupply = 1;
     uint256 private constant MAX_SUPPLY = 11;
@@ -35,6 +36,14 @@ contract NFT is ERC721 {
         }
         tokenSupply = _tokenSupply;
         _safeMint(_to, _tokenSupply - 1);
+    }
+
+    /*
+     * @title Admin withdraw function
+     * @notice The admin can withdraw the balance of this contract
+     */
+    function ownerWithdraw() external onlyOwner {
+        payable(msg.sender).transfer(address(this).balance);
     }
 
     function _baseURI() internal pure override returns (string memory) {

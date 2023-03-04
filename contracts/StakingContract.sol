@@ -3,9 +3,18 @@ pragma solidity 0.8.18;
 
 import "../contracts/NFT.sol";
 import "../contracts/Token.sol";
+import "../contracts/IToken.sol";
 
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
+import "@openzeppelin/contracts/utils/introspection/ERC165.sol";
+
+// ERRORS FOUND WITH SLITHER:
+// - some variables should've been constants
+// - Token contract wasn't initialized
+// - all withdraw methods use dangerous strict equality check
+// - withdrawing nft uses a local variable never initialized (mapping => struct)
+//   which is alyways initialized when depositing / staking an nft (maybe false positive)
 
 /*
  * @title A NFT Receiver contract used for staking that can mint ERC20 Tokens as reward
@@ -14,9 +23,9 @@ import "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
  * @dev the NFT's can only be withdrawn by the original owner who deposited them
  */
 contract StakingContract is IERC721Receiver, Ownable {
-    Token public tokenContract;
-    IERC721 public immutable nftContract;
-    uint256 public STAKING_REWARD_PER_DAY = 10 ether;
+    IToken private tokenContract;
+    IERC721 private nftContract;
+    uint256 public constant STAKING_REWARD_PER_DAY = 10 ether;
 
     struct StakedNftStruct {
         address originalOwner;
@@ -26,8 +35,16 @@ contract StakingContract is IERC721Receiver, Ownable {
     // keeps track of which nft is staked by a) who & b) when was it deposited
     mapping(uint256 => StakedNftStruct) public nftsStaked;
 
-    constructor(IERC721 _address) {
-        nftContract = _address;
+    constructor(address _NftAddress) {
+        require(
+            ERC165(_NftAddress).supportsInterface(type(IERC721).interfaceId),
+            "Contract is not ERC721"
+        );
+        nftContract = IERC721(_NftAddress);
+    }
+
+    function setTokenContract(address _tokenAddress) external onlyOwner {
+        tokenContract = IToken(_tokenAddress);
     }
 
     /*

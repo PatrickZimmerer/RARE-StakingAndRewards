@@ -10,7 +10,11 @@ describe("StakingContract", () => {
     let tokenContract;
     let nftContract;
 
-    const NFT_CONTRACT_ADDRESS = "0xe4064d8E292DCD971514972415664765e51B5364";
+    const NFT_NAME = "TestNFT";
+    const NFT_SYMBOL = "TNF";
+    const TOKEN_NAME = "TestToken";
+    const TOKEN_SYMBOL = "TET";
+    const MAX_SUPPLY = BigNumber.from("100000000");
 
     const STAKING_REWARD_PER_DAY = BigNumber.from("10");
 
@@ -18,22 +22,40 @@ describe("StakingContract", () => {
 
     beforeEach(async () => {
         [depl, acc1] = await ethers.getSigners();
-
         deployer = depl;
         account1 = acc1;
+
+        const NFTFactory = await ethers.getContractFactory("NFT");
+        nftContract = await NFTFactory.deploy(NFT_NAME, NFT_SYMBOL);
         const StakingContractFactory = await ethers.getContractFactory(
             "StakingContract"
         );
         stakingContract = await StakingContractFactory.deploy(
-            NFT_CONTRACT_ADDRESS
+            nftContract.address
         );
-        console.log("test");
         await stakingContract.deployed();
+        const TokenFactory = await ethers.getContractFactory("Token");
+        tokenContract = await TokenFactory.deploy(
+            TOKEN_NAME,
+            TOKEN_SYMBOL,
+            stakingContract.address
+        );
+        console.log("before tx");
+        const tx = await stakingContract.setTokenContract(
+            tokenContract.address
+        );
+        console.log("tx", tx);
+
+        await tx.wait();
     });
     describe("constructor", () => {
         it("should deploy to an address", async () => {
             expect(await stakingContract.address).to.not.be.null;
             expect(await stakingContract.address).to.be.ok;
+            expect(await tokenContract.address).to.not.be.null;
+            expect(await tokenContract.address).to.be.ok;
+            expect(await nftContract.address).to.not.be.null;
+            expect(await nftContract.address).to.be.ok;
         });
         it("should set the nftContract on deployment", async () => {
             //TODO add nft contract address

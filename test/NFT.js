@@ -8,8 +8,8 @@ describe("NFT", () => {
     let deployer;
     let account1;
 
-    const NAME = "Test Nft";
-    const SYMBOL = "TNFT";
+    const NAME = "TestNFT";
+    const SYMBOL = "TNF";
 
     const MAX_SUPPLY = 11;
     const PRICE = ethers.utils.parseEther("0.0001");
@@ -17,9 +17,9 @@ describe("NFT", () => {
 
     beforeEach(async () => {
         [depl, acc1] = await ethers.getSigners();
-
         deployer = depl;
         account1 = acc1;
+
         const NFTFactory = await ethers.getContractFactory("NFT");
         nft = await NFTFactory.deploy(NAME, SYMBOL);
         await nft.deployed();
