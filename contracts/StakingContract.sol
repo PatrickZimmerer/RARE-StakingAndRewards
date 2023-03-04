@@ -22,7 +22,7 @@ import "@openzeppelin/contracts/utils/introspection/ERC165.sol";
  * @notice This contract can receive NFTs and mint erc20 tokens as a staking reward
  * @dev the NFT's can only be withdrawn by the original owner who deposited them
  */
-contract StakingContract is IERC721Receiver, Ownable {
+contract StakingContract is IERC721Receiver, ERC165, Ownable {
     IToken private tokenContract;
     IERC721 private nftContract;
     uint256 public constant STAKING_REWARD_PER_DAY = 10 ether;
@@ -47,7 +47,7 @@ contract StakingContract is IERC721Receiver, Ownable {
         // TODO: Fix this require here
         // require(
         //     ERC165(_tokenAddress).supportsInterface(type(IToken).interfaceId),
-        //     "Contract is not ERC721"
+        //     "Contract is not IToken"
         // );
         tokenContract = IToken(_tokenAddress);
     }
