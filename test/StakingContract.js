@@ -29,6 +29,7 @@ describe("StakingContract", () => {
         [deployer, account1] = await ethers.getSigners();
         const NFTFactory = await ethers.getContractFactory("NFT");
         nftContract = await NFTFactory.deploy(NFT_NAME, NFT_SYMBOL);
+        await nftContract.deployed();
         const StakingContractFactory = await ethers.getContractFactory(
             "StakingContract"
         );
@@ -42,6 +43,7 @@ describe("StakingContract", () => {
             TOKEN_SYMBOL,
             stakingContract.address
         );
+        await tokenContract.deployed();
 
         const tx = await stakingContract.setTokenContract(
             tokenContract.address
@@ -57,10 +59,11 @@ describe("StakingContract", () => {
             expect(await nftContract.address).to.not.be.null;
             expect(await nftContract.address).to.be.ok;
         });
-        xit("should revert deployment since the passed in contract is not ERC721", async () => {
+        it("should revert deployment since the passed in contract is not ERC721", async () => {
             const StakingContractFactory = await ethers.getContractFactory(
                 "StakingContract"
             );
+            console.log(tokenContract.address);
             await expect(
                 StakingContractFactory.deploy(tokenContract.address)
             ).to.be.revertedWith("Contract is not ERC721");

@@ -14,7 +14,7 @@ import "@openzeppelin/contracts/utils/introspection/ERC165.sol";
 // - Token contract wasn't initialized
 // - all withdraw methods use dangerous strict equality check
 // - withdrawing nft uses a local variable never initialized (mapping => struct)
-//   which is alyways initialized when depositing / staking an nft (maybe false positive)
+// - shouldn't use block.timestamp => whats a better alternative?
 
 /*
  * @title A NFT Receiver contract used for staking that can mint ERC20 Tokens as reward
@@ -24,7 +24,7 @@ import "@openzeppelin/contracts/utils/introspection/ERC165.sol";
  */
 contract StakingContract is IERC721Receiver, ERC165, Ownable {
     IToken private tokenContract;
-    IERC721 private nftContract;
+    IERC721 private immutable NFT_CONTRACT;
     uint256 public constant STAKING_REWARD_PER_DAY = 10 ether;
 
     struct StakedNftStruct {
@@ -40,7 +40,7 @@ contract StakingContract is IERC721Receiver, ERC165, Ownable {
             ERC165(_NftAddress).supportsInterface(type(IERC721).interfaceId),
             "Contract is not ERC721"
         );
-        nftContract = IERC721(_NftAddress);
+        NFT_CONTRACT = IERC721(_NftAddress);
     }
 
     function setTokenContract(address _tokenAddress) external onlyOwner {
@@ -62,7 +62,7 @@ contract StakingContract is IERC721Receiver, ERC165, Ownable {
             uint96(block.timestamp)
         );
         // Do not use safeTransferFrom because it will collude with onERC781Received function
-        nftContract.transferFrom(msg.sender, address(this), tokenId);
+        NFT_CONTRACT.transferFrom(msg.sender, address(this), tokenId);
     }
 
     /*
@@ -76,7 +76,7 @@ contract StakingContract is IERC721Receiver, ERC165, Ownable {
         uint256 tokenId,
         bytes calldata
     ) external override returns (bytes4) {
-        nftContract.transferFrom(msg.sender, address(this), tokenId);
+        NFT_CONTRACT.transferFrom(msg.sender, address(this), tokenId);
         nftsStaked[tokenId] = StakedNftStruct(from, uint96(block.timestamp));
         // if this returns something that makes _safeTransfers require revert,
         // does the mapping entry still persist or does that get reverted too?
@@ -94,9 +94,8 @@ contract StakingContract is IERC721Receiver, ERC165, Ownable {
             nftsStaked[_tokenId].originalOwner == _msgSender(),
             "Not original owner!"
         );
-        StakedNftStruct memory nullStruct;
-        nftsStaked[_tokenId] = nullStruct; // remove NFT from mapping
-        nftContract.safeTransferFrom(address(this), _msgSender(), _tokenId);
+        delete nftsStaked[_tokenId]; // remove NFT from mapping
+        NFT_CONTRACT.safeTransferFrom(address(this), _msgSender(), _tokenId);
     }
 
     /*
@@ -126,7 +125,7 @@ contract StakingContract is IERC721Receiver, ERC165, Ownable {
         StakedNftStruct memory nullStruct;
         nftsStaked[_tokenId] = nullStruct; // remove NFT from mapping
         tokenContract.mint(_msgSender(), stakingReward);
-        nftContract.safeTransferFrom(address(this), _msgSender(), _tokenId);
+        NFT_CONTRACT.safeTransferFrom(address(this), _msgSender(), _tokenId);
     }
 
     /*

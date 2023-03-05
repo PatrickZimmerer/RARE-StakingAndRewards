@@ -46,15 +46,15 @@ contract NFT is ERC721, Ownable {
         payable(msg.sender).transfer(address(this).balance);
     }
 
-    function _baseURI() internal pure override returns (string memory) {
-        return "ipfs://QmX597cEg8LCFbND2YwFsFd7SmiSr8sNQq1GWyKv7u3tYR/";
-    }
-
     function viewBalance() external view returns (uint256) {
         return address(this).balance;
     }
 
     function totalSupply() external pure returns (uint256) {
         return MAX_SUPPLY - 1; // token supply starts at 1
+    }
+
+    function _baseURI() internal pure override returns (string memory) {
+        return "ipfs://QmX597cEg8LCFbND2YwFsFd7SmiSr8sNQq1GWyKv7u3tYR/";
     }
 }
