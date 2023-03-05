@@ -39,12 +39,4 @@ contract Token is ERC20Capped, Ownable {
     function mint(address _to, uint256 _amount) external onlyStakingContract {
         _mint(_to, _amount);
     }
-
-    /*
-     * @title Admin withdraw function
-     * @notice The admin can withdraw the balance of this contract
-     */
-    function ownerWithdraw() external onlyOwner {
-        payable(msg.sender).transfer(address(this).balance);
-    }
 }

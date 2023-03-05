@@ -52,18 +52,31 @@ contract StakingContract is IERC721Receiver, ERC165, Ownable {
         tokenContract = IToken(_tokenAddress);
     }
 
+    /**
+     * @notice Deposit your NFT to gain rewards
+     * @param tokenId uint256 ID of the token to deposit
+     */
+    function depositNFT(uint256 tokenId) external {
+        nftsStaked[tokenId] = StakedNftStruct(
+            msg.sender,
+            uint96(block.timestamp)
+        );
+        // Do not use safeTransferFrom because it will collude with onERC781Received function
+        nftContract.transferFrom(msg.sender, address(this), tokenId);
+    }
+
     /*
      * @title Basic receiver function from IERC721Receiver
      * @notice every time an NFT is received this gets triggered
      * @dev it's used to keep track of the staked nft
      */
     function onERC721Received(
-        address,
         address from,
+        address,
         uint256 tokenId,
         bytes calldata
     ) external override returns (bytes4) {
-        require(msg.sender == address(nftContract), "Not our NFT contract");
+        nftContract.transferFrom(msg.sender, address(this), tokenId);
         nftsStaked[tokenId] = StakedNftStruct(from, uint96(block.timestamp));
         // if this returns something that makes _safeTransfers require revert,
         // does the mapping entry still persist or does that get reverted too?
