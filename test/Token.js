@@ -7,6 +7,8 @@ describe("Token", () => {
     let token;
     let deployer;
     let account1;
+    let nftContract;
+    let stakingContract;
 
     const NFT_NAME = "TestNFT";
     const NFT_SYMBOL = "TNF";
@@ -18,13 +20,10 @@ describe("Token", () => {
     const SMALL_AMOUNT_OF_ETH = ethers.utils.parseEther("0.0001");
 
     beforeEach(async () => {
-        [depl, acc1] = await ethers.getSigners();
-
-        deployer = depl;
-        account1 = acc1;
+        [deployer, account1] = await ethers.getSigners();
 
         const NFTFactory = await ethers.getContractFactory("NFT");
-        const nftContract = await NFTFactory.deploy(NFT_NAME, NFT_SYMBOL);
+        nftContract = await NFTFactory.deploy(NFT_NAME, NFT_SYMBOL);
         const StakingContractFactory = await ethers.getContractFactory(
             "StakingContract"
         );
@@ -53,6 +52,36 @@ describe("Token", () => {
             expect(await token.STAKING_CONTRACT).to.equal(
                 stakingContract.addrress
             );
+        });
+    });
+    describe("mint", () => {
+        xit("should mint the given amount of tokens because the stakingContract called that", async () => {
+            const signer = await ethers.provider.getSigner(
+                stakingContract.address
+            );
+            // console.log(signer);
+            const tx = await token
+                .connect(signer)
+                .mint(account1.address, BigNumber.from("10"));
+            await tx.wait();
+            let userBalance = await token.balanceOf(account1.address);
+            expect(userBalance).eq(
+                BigNumber.from(ethers.utils.parseEther("10"))
+            );
+
+            const tx2 = await token
+                .connect(signer)
+                .mint(account1.address, BigNumber.from("100"));
+            await tx2.wait();
+            userBalance = await token.balanceOf(account1.address);
+            expect(userBalance).eq(BigNumber.from("110"));
+        });
+        it("should revert since the caller is not the stakingContract", async () => {
+            await expect(
+                token
+                    .connect(account1)
+                    .mint(account1.address, BigNumber.from("10"))
+            ).to.be.revertedWith("Only the staking contract can do this.");
         });
     });
 });

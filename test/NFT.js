@@ -11,15 +11,15 @@ describe("NFT", () => {
     const NAME = "TestNFT";
     const SYMBOL = "TNF";
 
+    const BIG_0 = BigNumber.from("0");
+    const BIG_1 = BigNumber.from("1");
     const MAX_SUPPLY = 11;
     const PRICE = ethers.utils.parseEther("0.0001");
     const SMALL_AMOUNT_OF_ETH = ethers.utils.parseEther("0.0001");
     const TINY_AMOUNT_OF_ETH = ethers.utils.parseEther("0.0000001");
 
     beforeEach(async () => {
-        [depl, acc1] = await ethers.getSigners();
-        deployer = depl;
-        account1 = acc1;
+        [deployer, account1] = await ethers.getSigners();
 
         const NFTFactory = await ethers.getContractFactory("NFT");
         nft = await NFTFactory.deploy(NAME, SYMBOL);
@@ -40,13 +40,13 @@ describe("NFT", () => {
             const tx = await nft.mint(account1.address, { value: PRICE });
             await tx.wait();
             let userBalance = await nft.balanceOf(account1.address);
-            expect(userBalance).to.deep.equal(BigNumber.from("1"));
+            expect(userBalance).eq(BIG_1);
 
             const tx2 = await nft.mint(account1.address, { value: PRICE });
             await tx2.wait();
             userBalance = await nft.balanceOf(account1.address);
-            expect(userBalance).to.deep.equal(BigNumber.from("2"));
-            expect(await nft.tokenSupply()).to.deep.equal(BigNumber.from("3"));
+            expect(userBalance).eq(BigNumber.from("2"));
+            expect(await nft.tokenSupply()).eq(BigNumber.from("3"));
         });
         it("should revert the eleventh mint since MAX_SUPPLY is reached", async () => {
             let i = 0;
@@ -55,7 +55,7 @@ describe("NFT", () => {
                 await tx.wait();
                 i++;
             }
-            expect(await nft.tokenSupply()).to.deep.equal(BigNumber.from("11"));
+            expect(await nft.tokenSupply()).eq(BigNumber.from("11"));
             await expect(
                 nft.mint(account1.address, { value: PRICE })
             ).to.be.revertedWith("Max Supply reached.");
@@ -92,9 +92,7 @@ describe("NFT", () => {
             expect(contractBalance).eq(PRICE);
             const withdrawTx = await nft.ownerWithdraw();
             withdrawTx.wait();
-            expect(await ethers.provider.getBalance(nft.address)).eq(
-                BigNumber.from("0")
-            );
+            expect(await ethers.provider.getBalance(nft.address)).eq(BIG_0);
             const endingBalance = startingBalance.add(PRICE);
 
             expect(
@@ -111,7 +109,7 @@ describe("NFT", () => {
         it("should return the correct base URI when called through ERC721s tokenURI", async () => {
             const tx = await nft.mint(account1.address, { value: PRICE });
             await tx.wait();
-            const baseURI = await nft.tokenURI(BigNumber.from("1"));
+            const baseURI = await nft.tokenURI(BIG_1);
             expect(baseURI).eq(
                 `ipfs://QmX597cEg8LCFbND2YwFsFd7SmiSr8sNQq1GWyKv7u3tYR/${BigNumber.from(
                     "1"
@@ -119,7 +117,7 @@ describe("NFT", () => {
             );
         });
         it("should revert since tokenId has not been minted yet", async () => {
-            await expect(nft.tokenURI(BigNumber.from("1"))).to.be.revertedWith(
+            await expect(nft.tokenURI(BIG_1)).to.be.revertedWith(
                 "ERC721: invalid token ID"
             );
         });
@@ -128,7 +126,7 @@ describe("NFT", () => {
         it("should return the correct balance of the contract before and after minting an NFT", async () => {
             let balance = await ethers.provider.getBalance(nft.address);
             let expectedBalance = await nft.viewBalance();
-            expect(balance).eq(BigNumber.from("0"));
+            expect(balance).eq(BIG_0);
             expect(balance).eq(expectedBalance);
 
             let tx = await nft.mint(account1.address, { value: PRICE });
@@ -143,14 +141,14 @@ describe("NFT", () => {
             balance = await ethers.provider.getBalance(nft.address);
             expectedBalance = await nft.viewBalance();
             const tokenSupply = await nft.tokenSupply();
-            expect(balance).eq(PRICE.mul(tokenSupply.sub(BigNumber.from("1"))));
+            expect(balance).eq(PRICE.mul(tokenSupply.sub(BIG_1)));
             expect(balance).eq(expectedBalance);
 
             tx = await nft.ownerWithdraw();
             await tx.wait();
             balance = await ethers.provider.getBalance(nft.address);
             expectedBalance = await nft.viewBalance();
-            expect(balance).eq(BigNumber.from("0"));
+            expect(balance).eq(BIG_0);
             expect(balance).eq(expectedBalance);
         });
     });
@@ -158,7 +156,7 @@ describe("NFT", () => {
         it("should return the correct total supply", async () => {
             let totalSupply = await nft.totalSupply();
             // minus one since we start at tokenSupply 1 and go to 11 => 10
-            expect(totalSupply).to.deep.equal(MAX_SUPPLY - 1);
+            expect(totalSupply).eq(MAX_SUPPLY - 1);
         });
     });
 });
