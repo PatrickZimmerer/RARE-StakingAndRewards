@@ -44,11 +44,6 @@ contract StakingContract is IERC721Receiver, ERC165, Ownable {
     }
 
     function setTokenContract(address _tokenAddress) external onlyOwner {
-        // TODO: Fix this require here
-        // require(
-        //     ERC165(_tokenAddress).supportsInterface(type(IToken).interfaceId),
-        //     "Contract is not IToken"
-        // );
         tokenContract = IToken(_tokenAddress);
     }
 
