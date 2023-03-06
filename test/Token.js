@@ -15,10 +15,6 @@ describe("Token", () => {
     const TOKEN_NAME = "TestToken";
     const TOKEN_SYMBOL = "TET";
 
-    const MAX_SUPPLY = 11;
-    const PRICE = ethers.utils.parseEther("0.0001");
-    const SMALL_AMOUNT_OF_ETH = ethers.utils.parseEther("0.0001");
-
     beforeEach(async () => {
         [deployer, account1] = await ethers.getSigners();
 
