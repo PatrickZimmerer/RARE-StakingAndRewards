@@ -17,13 +17,8 @@ describe("StakingContract", () => {
 
     const BIG_0 = BigNumber.from("0");
     const BIG_1 = BigNumber.from("1");
-    const MAX_SUPPLY = BigNumber.from("100000000");
 
     const PRICE = ethers.utils.parseEther("0.0001");
-
-    const STAKING_REWARD_PER_DAY = BigNumber.from("10");
-
-    const SMALL_AMOUNT_OF_ETH = ethers.utils.parseEther("0.0001");
 
     beforeEach(async () => {
         [deployer, account1] = await ethers.getSigners();
@@ -63,10 +58,11 @@ describe("StakingContract", () => {
             const StakingContractFactory = await ethers.getContractFactory(
                 "StakingContract"
             );
-            console.log(tokenContract.address);
             await expect(
                 StakingContractFactory.deploy(tokenContract.address)
-            ).to.be.revertedWith("Contract is not ERC721");
+            ).to.be.revertedWith(
+                "function selector was not recognized and there's no fallback function"
+            );
         });
     });
     describe("setTokenContract", () => {
@@ -77,10 +73,19 @@ describe("StakingContract", () => {
                     .setTokenContract(tokenContract.address)
             ).to.be.revertedWith("Ownable: caller is not the owner");
         });
-        xit("should revert since the passed in contract is not IToken", async () => {
-            await expect(
-                stakingContract.setTokenContract(nftContract.address)
-            ).to.be.revertedWith("Contract is not IToken");
+        it("should set a new token contract address", async () => {
+            const NewContractFactory = await ethers.getContractFactory("ERC20");
+            const newContract = await NewContractFactory.deploy(
+                TOKEN_NAME,
+                TOKEN_SYMBOL
+            );
+            let setTx = await stakingContract.setTokenContract(
+                newContract.address
+            );
+            await setTx.wait();
+            expect(await stakingContract.getTokenContractAddress()).eq(
+                newContract.address
+            );
         });
     });
     describe("onERC721Received", () => {
@@ -103,11 +108,13 @@ describe("StakingContract", () => {
                     )
             ).to.be.revertedWith("ERC721: transfer from incorrect owner");
         });
-        xit("should deposit the NFT to our nftsStaked mapping", async () => {
+        it("should deposit the NFT to our nftsStaked mapping", async () => {
             expect(await nftContract.balanceOf(stakingContract.address)).eq(
                 BIG_0
             );
-            expect(await nftContract.balanceOf(deplyoer.address)).eq(BIG_1);
+            expect(await nftContract.balanceOf(deployer.address)).eq(BIG_1);
+            const tx = await stakingContract.depositNFT(BIG_1);
+            await tx.wait();
             const nftsStakedToken1 = await stakingContract.nftsStaked(BIG_1);
             expect(nftsStakedToken1.originalOwner).to.be.equal(
                 deployer.address
@@ -118,11 +125,16 @@ describe("StakingContract", () => {
             expect(await nftContract.balanceOf(deployer.address)).to.be.equal(
                 BIG_0
             );
-            //TODO: FIX THIS TEST
-            console.log(
-                nftsStakedToken1.originalOwner,
-                "THIS TEST IS NOT WORKING PROPERLY"
+        });
+        it("should return when called", async () => {
+            const tx = await stakingContract.callStatic.onERC721Received(
+                ethers.constants.AddressZero,
+                ethers.constants.AddressZero,
+                BIG_1,
+                "0x"
             );
+            console.log(tx);
+            expect(tx).to.equal("0x150b7a02");
         });
     });
     describe("withdrawNFT", () => {
@@ -167,14 +179,19 @@ describe("StakingContract", () => {
             await nftContract.approve(stakingContract.address, BIG_1);
             const sendTx = await stakingContract.depositNFT(BIG_1);
             await sendTx.wait();
+
             await provider.send("evm_increaseTime", [24 * 60 * 60]);
         });
         it("should withdraw the staking rewards for one whole day", async () => {
+            let userBalance = await tokenContract.balanceOf(deployer.address);
+            expect(userBalance).eq(
+                BigNumber.from(ethers.utils.parseEther("0"))
+            );
             const withdrawTx = await stakingContract.withdrawStakingReward(
                 BIG_1
             );
             await withdrawTx.wait();
-            const userBalance = await tokenContract.balanceOf(deployer.address);
+            userBalance = await tokenContract.balanceOf(deployer.address);
             expect(userBalance).eq(
                 BigNumber.from(ethers.utils.parseEther("10"))
             );
@@ -265,24 +282,27 @@ describe("StakingContract", () => {
             const sendTx = await stakingContract.depositNFT(BIG_1);
             await sendTx.wait();
             await provider.send("evm_increaseTime", [24 * 60 * 60]);
+            await provider.send("evm_mine");
         });
-        xit("should return the staking rewards for one whole day", async () => {
+        it("should return the staking rewards for one whole day", async () => {
             const stakingAmount = await stakingContract.calculateStakingReward(
                 BIG_1
             );
+
             expect(stakingAmount).eq(
                 BigNumber.from(ethers.utils.parseEther("10"))
             );
         });
-        xit("should return the staking rewards for ten whole day", async () => {
+        it("should return the staking rewards for nine whole days", async () => {
             // adds another day
-            await ethers.provider.send("evm_increaseTime", [24 * 60 * 60 * 9]);
-
+            await ethers.provider.send("evm_increaseTime", [8 * 24 * 60 * 60]);
+            await ethers.provider.send("evm_mine");
             const stakingAmount = await stakingContract.calculateStakingReward(
                 BIG_1
             );
+
             expect(stakingAmount).eq(
-                BigNumber.from(ethers.utils.parseEther("100"))
+                BigNumber.from(ethers.utils.parseEther("90"))
             );
         });
     });

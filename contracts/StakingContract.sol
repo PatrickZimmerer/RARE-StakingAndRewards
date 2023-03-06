@@ -123,6 +123,10 @@ contract StakingContract is IERC721Receiver, ERC165, Ownable {
         NFT_CONTRACT.safeTransferFrom(address(this), _msgSender(), _tokenId);
     }
 
+    function getTokenContractAddress() external view returns (IToken) {
+        return tokenContract;
+    }
+
     /*
      * @title Helper function to calculate the staking reward
      * @notice calculates staking reward for a specific NFT
