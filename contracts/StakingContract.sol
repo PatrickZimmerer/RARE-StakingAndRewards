@@ -117,8 +117,7 @@ contract StakingContract is IERC721Receiver, ERC165, Ownable {
             "Not original owner!"
         );
         uint256 stakingReward = calculateStakingReward(_tokenId);
-        StakedNftStruct memory nullStruct;
-        nftsStaked[_tokenId] = nullStruct; // remove NFT from mapping
+        delete nftsStaked[_tokenId]; // remove NFT from mapping
         tokenContract.mint(_msgSender(), stakingReward);
         NFT_CONTRACT.safeTransferFrom(address(this), _msgSender(), _tokenId);
     }
