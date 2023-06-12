@@ -1,32 +1,36 @@
-const { network } = require("hardhat");
+const { network, ethers, upgrades } = require("hardhat");
 const { developmentChains } = require("../helper-hardhat-config");
 const { verify } = require("../utils/verify");
 
 module.exports = async function ({ getNamedAccounts, deployments }) {
-    const { deploy, log } = deployments;
-    const { deployer } = await getNamedAccounts();
+    const { log } = deployments;
 
     let addressMap = require("../shared-data.js");
     const nftContractAddress = addressMap.nftContractAddress;
 
     const arguments = [nftContractAddress];
 
-    const stakingContract = await deploy("StakingContract", {
-        from: deployer,
-        args: arguments,
-        logs: true,
-        waitConfirmations: network.config.blockConfirmations || 1,
-    });
+    const StakingContract = await ethers.getContractFactory("StakingContract");
+    const stakingContract = await upgrades.deployProxy(
+        StakingContract,
+        arguments,
+        {
+            initializer: "initialize",
+        }
+    );
 
     // only verify the code when not on development chains as hardhat
     if (
         !developmentChains.includes(network.name) &&
         process.env.ETHERSCAN_API_KEY
     ) {
-        log("Verifying...");
+        log("Verifying UPGRADEABLE Staking contract...");
         await verify(stakingContract.address, arguments);
     }
-    log("StakingContract deployed successfully at:", stakingContract.address);
+    log(
+        "UPGRADEABLE StakingContract deployed successfully at:",
+        stakingContract.address
+    );
     log("-----------------------------------------");
 
     addressMap.stakingContractAddress = stakingContract.address;

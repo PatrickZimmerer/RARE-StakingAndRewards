@@ -5,9 +5,10 @@ import "../contracts/NFT.sol";
 import "../contracts/Token.sol";
 import "../contracts/IToken.sol";
 
-import "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
-import "@openzeppelin/contracts/utils/introspection/ERC165.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC721/IERC721ReceiverUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
 // ERRORS FOUND WITH SLITHER:
 // - some variables should've been constants
@@ -22,9 +23,13 @@ import "@openzeppelin/contracts/utils/introspection/ERC165.sol";
  * @notice This contract can receive NFTs and mint erc20 tokens as a staking reward
  * @dev the NFT's can only be withdrawn by the original owner who deposited them
  */
-contract StakingContract is IERC721Receiver, ERC165, Ownable {
+contract StakingContract is
+    IERC721ReceiverUpgradeable,
+    ERC165Upgradeable,
+    OwnableUpgradeable
+{
     IToken private tokenContract;
-    IERC721 private immutable NFT_CONTRACT;
+    IERC721 private NFT_CONTRACT;
     uint256 public constant STAKING_REWARD_PER_DAY = 10 ether;
 
     struct StakedNftStruct {
@@ -35,7 +40,9 @@ contract StakingContract is IERC721Receiver, ERC165, Ownable {
     // keeps track of which nft is staked by a) who & b) when was it deposited
     mapping(uint256 => StakedNftStruct) public nftsStaked;
 
-    constructor(address _NftAddress) {
+    function initialize(address _NftAddress) public initializer {
+        __Ownable_init();
+        __ERC165_init();
         require(
             ERC165(_NftAddress).supportsInterface(type(IERC721).interfaceId),
             "Contract is not ERC721"
