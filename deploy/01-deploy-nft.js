@@ -1,4 +1,4 @@
-const { network } = require("hardhat");
+const { network, ethers, upgrades } = require("hardhat");
 const { developmentChains } = require("../helper-hardhat-config");
 const { verify } = require("../utils/verify");
 
@@ -24,7 +24,7 @@ module.exports = async function ({ getNamedAccounts, deployments }) {
         log("Verifying UPGRADEABLE NFT contract...");
         await verify(nft.address, arguments);
     }
-    log(" UPGRADEABLE NFT deployed successfully at:", nft.address);
+    log("UPGRADEABLE NFT deployed successfully at:", nft.address);
     log("-----------------------------------------");
 
     let addressMap = require("../shared-data.js");

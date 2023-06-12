@@ -1,4 +1,4 @@
-const { network } = require("hardhat");
+const { network, ethers, upgrades } = require("hardhat");
 const { developmentChains } = require("../helper-hardhat-config");
 const { verify } = require("../utils/verify");
 
@@ -14,11 +14,9 @@ module.exports = async function ({ getNamedAccounts, deployments }) {
 
     const arguments = [name, symbol, stakingContractAddress];
 
-    const token = await deploy("Token", {
-        from: deployer,
-        args: arguments,
-        logs: true,
-        waitConfirmations: network.config.blockConfirmations || 1,
+    const Token = await ethers.getContractFactory("Token");
+    const token = await upgrades.deployProxy(Token, arguments, {
+        initializer: "initialize",
     });
 
     // only verify the code when not on development chains as hardhat
@@ -26,10 +24,10 @@ module.exports = async function ({ getNamedAccounts, deployments }) {
         !developmentChains.includes(network.name) &&
         process.env.ETHERSCAN_API_KEY
     ) {
-        log("Verifying...");
+        log("Verifying UPGRADEABLE Token contract...");
         await verify(token.address, arguments);
     }
-    log("Token deployed successfully at:", token.address);
+    log("UPGRADEABLE Token deployed successfully at:", token.address);
     log("-----------------------------------------");
 
     addressMap.tokenContractAddress = token.address;
