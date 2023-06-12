@@ -11,11 +11,9 @@ module.exports = async function ({ getNamedAccounts, deployments }) {
 
     const arguments = [name, symbol];
 
-    const nft = await deploy("NFT", {
-        from: deployer,
-        args: arguments,
-        logs: true,
-        waitConfirmations: network.config.blockConfirmations || 1,
+    const NFT = await ethers.getContractFactory("NFT");
+    const nft = await upgrades.deployProxy(NFT, arguments, {
+        initializer: "initialize",
     });
 
     // only verify the code when not on development chains as hardhat
@@ -23,10 +21,10 @@ module.exports = async function ({ getNamedAccounts, deployments }) {
         !developmentChains.includes(network.name) &&
         process.env.ETHERSCAN_API_KEY
     ) {
-        log("Verifying...");
+        log("Verifying UPGRADEABLE NFT contract...");
         await verify(nft.address, arguments);
     }
-    log("nft deployed successfully at:", nft.address);
+    log(" UPGRADEABLE NFT deployed successfully at:", nft.address);
     log("-----------------------------------------");
 
     let addressMap = require("../shared-data.js");

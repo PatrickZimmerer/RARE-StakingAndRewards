@@ -2,8 +2,12 @@
 pragma solidity 0.8.18;
 
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
+
+import "@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
 
 /*
  * @title A Basic NFT contract
@@ -11,16 +15,26 @@ import "@openzeppelin/contracts/access/Ownable.sol";
  * @notice This contract can mint NFTs
  * @dev and all of the basic ERC721 features
  */
-contract NFT is ERC721, Ownable {
+contract NFT is
+    Initializable,
+    UUPSUpgradeable,
+    ERC721Upgradeable,
+    OwnableUpgradeable
+{
     using Strings for uint256;
-    uint256 public tokenSupply = 1;
+    uint256 public tokenSupply;
     uint256 private constant MAX_SUPPLY = 11;
     uint256 public constant PRICE = 0.0001 ether;
 
-    constructor(
+    function initialize(
         string memory _name,
         string memory _symbol
-    ) ERC721(_name, _symbol) {}
+    ) public initializer {
+        __ERC721_init(_name, _symbol);
+        __Ownable_init();
+        __UUPSUpgradeable_init();
+        tokenSupply = 1;
+    }
 
     /*
      * @title Basic minting function
@@ -37,6 +51,10 @@ contract NFT is ERC721, Ownable {
         tokenSupply = _tokenSupply;
         _safeMint(_to, _tokenSupply - 1);
     }
+
+    function _authorizeUpgrade(
+        address _newImplementation
+    ) internal override onlyOwner {}
 
     /*
      * @title Admin withdraw function
